@@ -1,1 +1,1 @@
-# -trade-ai-agent
+you can see the chord conversation history
