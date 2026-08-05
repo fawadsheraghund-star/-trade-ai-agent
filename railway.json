@@ -1,0 +1,25 @@
+{
+  "name": "trade-ai-agent",
+  "version": "1.0.0",
+  "services": [
+    {
+      "name": "web",
+      "dockerfilePath": "./Dockerfile",
+      "startCommand": "uvicorn main:app --host 0.0.0.0 --port 8000",
+      "ports": ["8000"],
+      "env": [
+        { "key": "TELEGRAM_TOKEN", "value": null },
+        { "key": "OPENAI_API_KEY", "value": null },
+        { "key": "NEWSAPI_KEY", "value": null },
+        { "key": "BOT_OWNER_TELEGRAM_ID", "value": null },
+        { "key": "EXCHANGE_ID", "value": "binance" },
+        { "key": "LIVE_ENABLE", "value": "false" },
+        { "key": "USE_TESTNET", "value": "true" }
+      ]
+    }
+  ],
+  "railway": {
+    "projectName": "trade-ai-agent",
+    "region": "nrt"
+  }
+}
