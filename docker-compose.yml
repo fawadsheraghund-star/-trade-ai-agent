@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  trade-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: trade-ai-agent:feature-multi-exchange-agent
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEWSAPI_KEY=${NEWSAPI_KEY}
+      - LIVE_ENABLE=${LIVE_ENABLE:-false}
+      - BOT_OWNER_TELEGRAM_ID=${BOT_OWNER_TELEGRAM_ID}
+      - EXCHANGE_ID=${EXCHANGE_ID}
+      - USE_TESTNET=${USE_TESTNET:-true}
+      - PORT=8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
