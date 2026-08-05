@@ -34,9 +34,20 @@ async def recommend_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     symbol = args[0].upper()
     rec = engine.recommend(symbol)
-    text = f"Recommendation for {symbol}:\nSide: {rec['side']}\nConfidence: {rec['confidence']:.2f}\nPrice: {rec['last_price']}\nSuggested SL: {rec['suggested_sl']}\nSuggested TP: {rec['suggested_tp']}\nSuggested size value: {rec['suggested_size_value']:.2f}\nDry run: {rec['dry_run']}"
+    # Build the recommendation message safely
+    text_lines = [
+        f"Recommendation for {symbol}:",
+        f"Side: {rec.get('side')}",
+        f"Confidence: {rec.get('confidence', 0):.2f}",
+        f"Price: {rec.get('last_price')}",
+        f"Suggested SL: {rec.get('suggested_sl')}",
+        f"Suggested TP: {rec.get('suggested_tp')}",
+        f"Suggested Size (value): {rec.get('suggested_size_value')}",
+        f"Dry run: {rec.get('dry_run')}",
+    ]
+    text = "\n".join(text_lines)
     kb = [
-        [InlineKeyboardButton("Confirm & Place (Live)", callback_data=f"confirm|{symbol}|{rec['side']}|{rec['suggested_size_value']}")],
+        [InlineKeyboardButton("Confirm & Place (Live)", callback_data=f"confirm|{symbol}|{rec.get('side')}|{rec.get('suggested_size_value')}")],
         [InlineKeyboardButton("Dismiss", callback_data="dismiss")]
     ]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb))
@@ -78,14 +89,14 @@ async def voice_message_handler(update: Update, context: ContextTypes.DEFAULT_TY
     subprocess.run(cmd, shell=True, check=False)
     text = transcribe_audio(wav, language="ur")
     parsed = parse_command(text)
-    if parsed["action"] == "analysis":
-        rec = engine.recommend(parsed["symbol"] or "BTC/USDT")
-        await msg.reply_text(f"Recommendation: {rec['side']} (confidence {rec['confidence']:.2f})")
-    elif parsed["action"] == "trade":
+    if parsed.get("action") == "analysis":
+        rec = engine.recommend(parsed.get("symbol") or "BTC/USDT")
+        await msg.reply_text(f"Recommendation: {rec.get('side')} (confidence {rec.get('confidence',0):.2f})")
+    elif parsed.get("action") == "trade":
         # show recommendation & require confirm
-        rec = engine.recommend(parsed["symbol"] or "BTC/USDT")
-        kb = [[InlineKeyboardButton("Confirm", callback_data=f"confirm|{rec['symbol']}|{rec['side']}|{rec['suggested_size_value']}")]]
-        await msg.reply_text(f"Detected trade request: {parsed}\nRecommend: {rec['side']} (conf {rec['confidence']:.2f})", reply_markup=InlineKeyboardMarkup(kb))
+        rec = engine.recommend(parsed.get("symbol") or "BTC/USDT")
+        kb = [[InlineKeyboardButton("Confirm", callback_data=f"confirm|{rec.get('symbol') or parsed.get('symbol','BTC/USDT')}|{rec.get('side')}|{rec.get('suggested_size_value')}")]]
+        await msg.reply_text(f"Detected trade request: {parsed}\nRecommend: {rec.get('side')} (conf {rec.get('confidence',0):.2f})", reply_markup=InlineKeyboardMarkup(kb))
     else:
         await msg.reply_text(f"Could not parse: {text}")
 
