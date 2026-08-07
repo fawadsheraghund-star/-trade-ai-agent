@@ -1,0 +1,8 @@
+# Ignore Python cache & env
+__pycache__/
+*.pyc
+.env
+.env.*
+.vscode/
+.idea/
+.DS_Store
