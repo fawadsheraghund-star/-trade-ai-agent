@@ -1,5 +1,12 @@
-import sys
 import os
+import sys
+
+# Ensure the repository root (parent of src/) is on sys.path so imports like
+# `from src.config import settings` work when running `python src/main.py`.
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 from src.config import settings
 from src.telegram_bot import run_polling
 
