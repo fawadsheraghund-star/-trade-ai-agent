@@ -14,12 +14,3 @@ def run_polling(token: str) -> None:
     app.add_handler(CommandHandler("start", start_command))
     print("Starting Telegram bot (polling)...")
     app.run_polling()
-
-
-if __name__ == "__main__":
-    import os
-
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    if not TOKEN:
-        raise SystemExit("TELEGRAM_BOT_TOKEN is not set")
-    run_polling(TOKEN)
