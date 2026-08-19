@@ -15,17 +15,43 @@ if not logger.handlers:
 
 
 def detect_symbol(text: str) -> Optional[str]:
-    """Try to extract a symbol like BTCUSDT or BTC from free text."""
+    """Extract a trading symbol from text.
+
+    Rules:
+    - Prefer explicit pairs like BTCUSDT (case-insensitive)
+    - If single ticker token like BTC or ETH is present, return TOKENUSDT
+    - Do not mistake common stopwords for symbols
+    - Support simple Hindi/Urdu/English queries
+    """
     import re
-    # look for something like BTCUSDT or BTC/USDT or BTC
-    m = re.search(r"([A-Za-z]{2,10}USDT)", text, re.IGNORECASE)
+    if not text:
+        return None
+    # 1) explicit pair like BTCUSDT
+    m = re.search(r"\b([A-Za-z]{2,10}USDT)\b", text, re.IGNORECASE)
     if m:
         return m.group(1).upper()
-    m2 = re.search(r"\b([A-Za-z]{2,6})\b", text)
-    if m2:
-        # return token + USDT as default quote
-        return m2.group(1).upper() + "USDT"
-    return None
+
+    # 2) find candidate tokens
+    tokens = re.findall(r"\b([A-Za-z]{2,10})\b", text)
+    if not tokens:
+        return None
+
+    # stopwords covering English and simple transliteration of Hindi/Urdu
+    stopwords = {
+        'please', 'analyze', 'analysis', 'buy', 'sell', 'report', 'what', 'is', 'the', 'of', 'price', 'rate', 'how',
+        'ka', 'kya', 'है', 'करो', 'क्या', 'कहां', 'कहाँ', 'क्यों', 'please', 'thank', 'thanks', 'i', 'you', 'we',
+        'bitcoin', 'coin', 'market', 'show', 'give', 'tell'
+    }
+
+    # filter tokens: prefer last token that's not a stopword
+    candidates = [t for t in tokens if t.lower() not in stopwords]
+    if not candidates:
+        return None
+    token = candidates[-1]
+    # sanitize token length: typical tickers are 2-6 letters; if longer, still allow but uppercase
+    if len(token) <= 1:
+        return None
+    return token.upper() + 'USDT'
 
 
 def detect_language(text: str) -> str:

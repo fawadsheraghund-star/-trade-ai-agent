@@ -5,6 +5,11 @@ def test_detect_symbol_simple():
     assert detect_symbol('BTCUSDT') == 'BTCUSDT'
     assert detect_symbol('please analyze btc') == 'BTCUSDT'
     assert detect_symbol('Analyze ETH') == 'ETHUSDT'
+    assert detect_symbol('BTC का analysis करो') == 'BTCUSDT'
+    assert detect_symbol('please buy btc') == 'BTCUSDT'
+    assert detect_symbol('what is the price of eth') == 'ETHUSDT'
+    assert detect_symbol('please') is None
+    assert detect_symbol('analyze please') is None
 
 
 def test_detect_language():
